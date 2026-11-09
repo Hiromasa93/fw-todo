@@ -57,6 +57,14 @@ public class HomeController {
         return "edit-confirm";
     }
 
+    @PostMapping("/todos/{id}")
+    public String updateTodo(@PathVariable Long id, @ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
+        todo.setId(id);
+        todoMapper.update(todo);
+        redirectAttributes.addFlashAttribute("message", "保存しました");
+        return "redirect:/todos";
+    }
+
     @PostMapping("/todos/{id}/edit")
     public String rewriteEdit(@PathVariable Long id, @ModelAttribute Todo todo, Model model) {
         model.addAttribute("todo", todo);
