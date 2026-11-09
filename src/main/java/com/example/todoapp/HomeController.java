@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
@@ -35,6 +36,32 @@ public class HomeController {
     public String showCreateForm(Model model) {
         model.addAttribute("todo", new Todo());
         return "create";
+    }
+
+    @GetMapping("/todos/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Todo todo = todoMapper.findById(id);
+        if (todo == null) {
+            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
+            return "redirect:/todos";
+        }
+        model.addAttribute("todo", todo);
+        model.addAttribute("id", id);
+        return "edit";
+    }
+
+    @PostMapping("/todos/{id}/confirm")
+    public String confirmEdit(@PathVariable Long id, @ModelAttribute Todo todo, Model model) {
+        model.addAttribute("todo", todo);
+        model.addAttribute("id", id);
+        return "edit-confirm";
+    }
+
+    @PostMapping("/todos/{id}/edit")
+    public String rewriteEdit(@PathVariable Long id, @ModelAttribute Todo todo, Model model) {
+        model.addAttribute("todo", todo);
+        model.addAttribute("id", id);
+        return "edit";
     }
 
     @PostMapping("/todos/confirm")
