@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+
 @Controller
 public class HomeController {
 
@@ -70,9 +73,13 @@ public class HomeController {
     }
 
     @PostMapping("/todos/{id}/confirm")
-    public String confirmEdit(@PathVariable Long id, @ModelAttribute Todo todo, Model model) {
+    public String confirmEdit(@PathVariable Long id, @Valid @ModelAttribute Todo todo,
+            BindingResult bindingResult, Model model) {
         model.addAttribute("todo", todo);
         model.addAttribute("id", id);
+        if (bindingResult.hasErrors()) {
+            return "edit";
+        }
         return "edit-confirm";
     }
 
@@ -92,8 +99,12 @@ public class HomeController {
     }
 
     @PostMapping("/todos/confirm")
-    public String confirmCreate(@ModelAttribute Todo todo, Model model) {
+    public String confirmCreate(@Valid @ModelAttribute Todo todo,
+            BindingResult bindingResult, Model model) {
         model.addAttribute("todo", todo);
+        if (bindingResult.hasErrors()) {
+            return "create";
+        }
         return "create-confirm";
     }
 
