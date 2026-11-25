@@ -37,5 +37,23 @@
         </tbody>
     </table>
 </main>
+<script>
+    async function loadTodos() {
+        const calendar = document.querySelector('.calendar-table');
+        const from = calendar.dataset.from;
+        const to = calendar.dataset.to;
+        const res = await fetch(`/api/todos?from=${from}&to=${to}`);
+        const todos = await res.json();
+
+        document.querySelectorAll('.calendar-table [data-date]').forEach(cell => {
+            const dueTodos = todos.filter(todo => todo.dueDate === cell.dataset.date);
+            dueTodos.forEach(todo => {
+                cell.append(document.createTextNode(todo.title));
+            });
+        });
+    }
+
+    loadTodos();
+</script>
 </body>
 </html>
