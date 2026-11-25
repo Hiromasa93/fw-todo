@@ -1,21 +1,46 @@
 package com.example.todoapp.api;
 
 import java.util.Map;
+import java.time.Duration;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 @Component
 public class HolidayClient {
 
     private static final String HOLIDAYS_URL = "https://holidays-jp.github.io/api/v1/date.json";
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient;
 
-    public Map<String, String> fetchHolidays() {
-        return restClient.get()
-                .uri(HOLIDAYS_URL)
-                .retrieve()
-                .body(new ParameterizedTypeReference<Map<String, String>>() {});
+    public HolidayClient() {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(Duration.ofSeconds(3));
+        requestFactory.setReadTimeout(Duration.ofSeconds(5));
+        this.restClient = RestClient.builder().requestFactory(requestFactory).build();
+    }
+
+    public FetchResult fetchHolidays() {
+        try {
+            Map<String, String> holidays = restClient.get()
+                    .uri(HOLIDAYS_URL)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<Map<String, String>>() {});
+            return holidays == null ? FetchResult.unavailable() : FetchResult.available(holidays);
+        } catch (RestClientException exception) {
+            return FetchResult.unavailable();
+        }
+    }
+
+    public record FetchResult(Map<String, String> holidays, boolean unavailable) {
+        private static FetchResult available(Map<String, String> holidays) {
+            return new FetchResult(holidays, false);
+        }
+
+        private static FetchResult unavailable() {
+            return new FetchResult(Map.of(), true);
+        }
     }
 }
