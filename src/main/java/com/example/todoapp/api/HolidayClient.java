@@ -28,9 +28,9 @@ public class HolidayClient {
                     .uri(HOLIDAYS_URL)
                     .retrieve()
                     .body(new ParameterizedTypeReference<Map<String, String>>() {});
-            return holidays == null ? FetchResult.unavailable() : FetchResult.available(holidays);
+            return holidays == null ? FetchResult.unavailableResult() : FetchResult.available(holidays);
         } catch (RestClientException exception) {
-            return FetchResult.unavailable();
+            return FetchResult.unavailableResult();
         }
     }
 
@@ -39,7 +39,7 @@ public class HolidayClient {
             return new FetchResult(holidays, false);
         }
 
-        private static FetchResult unavailable() {
+        private static FetchResult unavailableResult() {
             return new FetchResult(Map.of(), true);
         }
     }
